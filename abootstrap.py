@@ -7,8 +7,9 @@ import time
 import datetime as dt
 import hashlib
 import shutil
+import subprocess
 
-class package:
+class Package:
     '''
     parse information from a pacman package
    
@@ -39,7 +40,11 @@ class package:
         self.__parse_pkginfo()
         self.rootpath = rootpath
         self.localname="-".join([self.pkginfo['pkgname'], self.pkginfo['pkgver']])
-        self.localpath = "".join([rootpath, '/var/lib/pacman/local/', self.localname]) 
+        self.localpath = '/'.join([rootpath, '/var/lib/pacman/local/', self.localname]) 
+        self.installfile = '/'.join([self.localpath, 'install'])
+        self.descfile = '/'.join([self.localpath, 'desc'])
+        self.filesfile = '/'.join([self.localpath, 'files'])
+        self.mtreefile = "/".join([self.localpath, "mtree"])
 
     def __parse_pkginfo(self):
         self.pkginfo = {}
@@ -83,8 +88,8 @@ class package:
         pkginfo.close()
 
 
-    def descfile(self):
-        with open(''.join([self.localpath,'/desc']), "w") as descfile:
+    def descfile_fun(self):
+        with open(self.descfile, "w") as descfile:
             print('%NAME%\n{}'.format(self.pkginfo['pkgname']), file=descfile)
             print('\n%VERSION%\n{}'.format(self.pkginfo['pkgver']), file=descfile)
             print('\n%DESC%\n{}'.format(self.pkginfo['pkgdesc']), file=descfile)
@@ -127,10 +132,10 @@ class package:
             print(file=descfile)
             os.remove("/".join([self.rootpath, '.PKGINFO']))
 
-    def installfile(self):
+    def installfile_fun(self):
         if ".INSTALL" in self.file_list:
             instfile = open("/".join([self.rootpath, '.INSTALL']))
-            installfile = open("/".join([self.localpath, 'install']), 'w')
+            installfile = open(self.installfile, 'w')
             for line in instfile:
                 print(line, file=installfile, end='')
             instfile.close()
@@ -144,8 +149,8 @@ class package:
         return ret
 
 
-    def filesfile(self):
-        filesfile = open("/".join([self.localpath, 'files']), 'w')
+    def filesfile_fun(self):
+        filesfile = open(self.filesfile, 'w')
         print("%FILES%", file=filesfile)
         for line in self.file_list:
             print(line, file=filesfile)
@@ -157,27 +162,33 @@ class package:
         print(file=filesfile)
         filesfile.close()
 
-    def mtreefile(self):
+    def mtreefile_fun(self):
         src = "/".join([self.rootpath, ".MTREE"])
-        dest = "/".join([self.localpath, "mtree"])
-        shutil.move(src, dest)
+        shutil.move(src, self.mtreefile)
 
     def extractfiles(self):
         self.pkg.extractall(path=self.rootpath)
         self.pkg.close()
         
+    def post_install_fun(self):
+        with open(self.installfile, 'r') as  installfile:
+            if 'post_install' in installfile.read():
+                os.chroot(self.rootpath)
+                os.putenv('BASH_ENV', self.installfile)
+                subprocess.call(["bash", '-c', 'post_install'])
+        
 
     def installpackage(self):
         os.makedirs(self.localpath, exist_ok=1)
         self.extractfiles()
-        self.descfile()
-        self.installfile()
-        self.filesfile()
-        self.mtreefile()
+        self.descfile_fun()
+        self.installfile_fun()
+        self.filesfile_fun()
+        self.mtreefile_fun()
 
 if __name__ == '__main__':
     if os.path.isdir(sys.argv[2]):
-        archive = package(sys.argv[1], sys.argv[2])
+        archive = Package(sys.argv[1], sys.argv[2])
         archive.installpackage()
 
 # vim : set ts=4 sw=4 softtabstop=4 et:
