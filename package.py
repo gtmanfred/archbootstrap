@@ -10,6 +10,36 @@ import hashlib
 import shutil
 import subprocess
 from collections import defaultdict
+import io
+
+class Repo(object):
+    """
+    """
+    def __init__(self, tar_path):
+        self.tree = self.load_repo_tgz(tar_path)
+    
+    def __getitem__(self, key):
+        return self.tree[key]
+
+    def __setitem__(self, key, value):
+        self.tree[key] = value
+
+    def load_repo_tgz(self, tar_path):
+        db = tarfile.open(tar_path)
+        tree = {}
+        for member in db.getmembers():
+            if not member.isfile():
+                continue
+            path = member.name
+            name,sub = os.path.split(path)
+            desc = DescParse(db.extractfile(member))
+            if name in tree:
+                # stack desc and depends
+                # (blame Dan why they are not in one file)
+                tree[name].info.update(desc.info)
+            else:
+                tree[name] = desc
+        return tree
 
 class DescParse(object):
     """
@@ -19,6 +49,15 @@ class DescParse(object):
         self.info = self.desc_load(desc_file)
         self.info = self.desc_clean(self.info)
 
+    def __repr__(self):
+        return repr(self.info)
+
+    def __getitem__(self, key):
+        return self.info[key]
+
+    def __setitem__(self, key, value):
+        self.info[key] = value
+
     # bunch of stateless/static methods
     # for easier testing and modularity
     def desc_load(self, desc_file):
@@ -26,7 +65,10 @@ class DescParse(object):
         info = defaultdict(list)
         mode = None
         for line in desc_file:
-            line = self.clean(line)
+            if type(line) == bytes:
+                line = line.decode("utf-8")
+            line = line.strip()
+            #line = self.clean(line)
             if not line:
                 continue
             if line.startswith('%'):
@@ -38,10 +80,10 @@ class DescParse(object):
 
     def desc_clean(self, info):
         "returns a new dictionary"
-        singles = 'NAME VERSION DESC URL SIZE INSTALLDATE BUILDDATE'.split()
-        integers = 'SIZE INSTALLDATE BUILDDATE'.split()
+        singles = 'NAME VERSION DESC URL'.split()
+        integers = 'SIZE CSIZE ISIZE INSTALLDATE BUILDDATE'.split()
         info2 = {}
-        for k in singles:
+        for k in singles + integers:
             if k not in info:
                 continue
             info2[k] = info[k][0]

@@ -156,8 +156,10 @@ def base_system(mirror, rootpath='/mnt/', devel=0):
 
 if __name__ == '__main__':
     #print( base_system('http://dfw.mirror.rackspace.com/archlinux/'))
-    d = DescParse(open('/var/lib/pacman/local/pacman-4.1.2-1/desc'))
-    print(d.info)
+    #d = DescParse(open('/var/lib/pacman/local/pacman-4.1.2-1/desc'))
+    #print(d.info)
+    db = Repo('/var/lib/pacman/sync/core.db')
+    print(db.tree)
 
 
 # vime: set ts=4 ws=4 et
