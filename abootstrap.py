@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from __future__ import print_function, generators, with_statement
+from time import sleep
 import os
 import re
 import tarfile
@@ -42,8 +43,11 @@ def package_depends(thisfile):
     else:
         return get_entries(thisfile)
 
-def find_depends(archive, packages):
-    retdepend = set()
+def find_depends(archive, packages, depends=0):
+    if depends:
+        retdepend = set(packages)
+    else:
+        retdepend = set()
     for package in packages:
         thisfile = archive.extractfile('/'.join([package,'depends']))
         depends = package_depends(thisfile)
@@ -61,7 +65,7 @@ def get_entries(thisfile):
 
 def depend_version(archive, depends):
     filelist = [ x.strip('/') for x in archive.getnames() if '/' not in x]
-    dependvers = set( y for x in depends for y in filelist if x in y )
+    dependvers = set( y for y in filelist for x in depends if x in y )
     return dependvers
 
 def get_groups(archive):
@@ -88,8 +92,20 @@ def base_system(mirror, rootpath='/mnt/', devel=0):
     packagedict = get_groups(archive)
     packages = get_packages(packagedict)
     depends = find_depends(archive, packages)
-    depend_version(archive,depends)
-    depends = depend_version(archive, depends) - packages
+    depends = depend_version(archive, depends)
+    depends2 = set()
+
+    while not depends2 and not len(depends2) is len(depends):
+        depends2 = depends
+        depends = find_depends(archive, depends2, depends=1)
+        depends = depend_version(archive, depends) - packages
+
+    for line in packages:
+        print(line)
+    for line in depends:
+        print(line)
+    return 0
+
     cache_location = '/'.join([rootpath, 'var/cache/pacman/pkg/'])
     os.makedirs(cache_location, exist_ok=1)
 
@@ -111,6 +127,8 @@ def base_system(mirror, rootpath='/mnt/', devel=0):
         installed_packages.append(thispkg)
 
     for package in depends:
+        if package in packages:
+            continue
         filename = '{}-{}.pkg.tar.xz'.format(package, arch)
         downloadfile = '/'.join([cache_location, filename])
         url = '/'.join([mirror, 'core', 'os', arch, filename])
@@ -128,7 +146,6 @@ def base_system(mirror, rootpath='/mnt/', devel=0):
         thispkg.installpackage()
         installed_packages.append(thispkg)
 
-    installed_packages.sort();
     call(['mount', '-R', '/dev/', '/'.join([rootpath, 'dev/'])])
     call(['mount', '-R', '/sys/', '/'.join([rootpath, 'sys/'])])
     call(['mount', '-R', '/proc/', '/'.join([rootpath, 'proc/'])])
