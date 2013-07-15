@@ -12,6 +12,16 @@ import subprocess
 from collections import defaultdict
 import io
 
+name_extract = lambda name, dashes: '-'.join(name.split('-')[:-dashes])
+remove_rel = lambda name: name_extract(name, 1)
+remove_v_r = lambda name: name_extract(name, 2) 
+
+def ver_clean(n):
+    n = n.strip()
+    for c in '><:=':
+        n = n.partition(c)[0]
+    return n
+
 class Repo(object):
     """
     """
@@ -19,7 +29,24 @@ class Repo(object):
         self.tree = self.load_repo_tgz(tar_path)
     
     def __getitem__(self, key):
-        return self.tree[key]
+        "smart enough to do partial matches"
+        # not that smart, runs in O(n*m)
+        if key in self.tree:
+            return self.tree[key]
+        # check for missing -rel
+        for k in self.tree:
+            if key == remove_rel(k):
+                return self.tree[k]
+        # check for missing -ver-rel
+        for k in self.tree:
+            if key == remove_v_r(k):
+                return self.tree[k]
+        # check for provides
+        for k in self.tree:
+            if 'PROVIDES' not in self.tree[k]:
+                continue
+            if key in [ver_clean(p) for p in self.tree[k]['PROVIDES']]:
+                return self.tree[k]
 
     def __setitem__(self, key, value):
         self.tree[key] = value
@@ -58,6 +85,9 @@ class DescParse(object):
     def __setitem__(self, key, value):
         self.info[key] = value
 
+    def __contains__(self, key):
+        return key in self.info
+
     # bunch of stateless/static methods
     # for easier testing and modularity
     def desc_load(self, desc_file):
@@ -94,12 +124,6 @@ class DescParse(object):
                 continue
             info2[k] = v
         return info2
-
-    def clean(self, n):
-        n = n.strip()
-        for c in '><:=':
-            n = n.partition(c)[0]
-        return n
 
     def serialize(self, keys):
         "returns string"

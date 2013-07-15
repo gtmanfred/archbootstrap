@@ -160,7 +160,10 @@ if __name__ == '__main__':
     #print(d.info)
     db = Repo('/var/lib/pacman/sync/core.db')
     #print(db.tree)
-    print(db['pacman-4.1.2-1'].serialize('NAME VERSION DESC URL ARCH BUILDDATE INSTALLDATE PACKAGER SIZE REASON GROUPS LICENSE VALIDATION REPLACES DEPENDS OPTDEPENDS CONFLICTS PROVIDES'.split()))
+    #print(db['pacman-4.1.2-1'].serialize('NAME VERSION DESC URL ARCH BUILDDATE INSTALLDATE PACKAGER SIZE REASON GROUPS LICENSE VALIDATION REPLACES DEPENDS OPTDEPENDS CONFLICTS PROVIDES'.split()))
+    #print(db['pacman-4.1.2'])
+    #print(db['pacman'])
+    print(db['pacman-contrib'])
 
 
 # vime: set ts=4 ws=4 et
