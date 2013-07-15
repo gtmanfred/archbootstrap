@@ -183,46 +183,46 @@ class Package:
 
     def descfile_fun(self):
         with open(self.descfile, "w") as descfile:
-            print('%NAME%\n{}'.format(self.pkginfo['pkgname']), file=descfile)
-            print('\n%VERSION%\n{}'.format(self.pkginfo['pkgver']), file=descfile)
-            print('\n%DESC%\n{}'.format(self.pkginfo['pkgdesc']), file=descfile)
-            print('\n%URL%\n{}'.format(self.pkginfo['url']), file=descfile)
-            print('\n%ARCH%\n{}'.format(self.pkginfo['arch']), file=descfile)
-            print('\n%BUILDDATE%\n{}'.format(self.pkginfo['builddate']), file=descfile)
-            print('\n%INSTALLDATE%\n{}'.format(int(time.mktime(dt.datetime.now().timetuple()))), file=descfile)
-            print('\n%PACKAGER%\n{}'.format(self.pkginfo['packager']), file=descfile)
-            print('\n%SIZE%\n{}'.format(self.pkginfo['size']), file=descfile)
+            descfile.write('%NAME%\n{}\n'.format(self.pkginfo['pkgname']))
+            descfile.write('\n%VERSION%\n{}\n'.format(self.pkginfo['pkgver']))
+            descfile.write('\n%DESC%\n{}\n'.format(self.pkginfo['pkgdesc']))
+            descfile.write('\n%URL%\n{}\n'.format(self.pkginfo['url']))
+            descfile.write('\n%ARCH%\n{}\n'.format(self.pkginfo['arch']))
+            descfile.write('\n%BUILDDATE%\n{}\n'.format(self.pkginfo['builddate']))
+            descfile.write('\n%INSTALLDATE%\n{}\n'.format(int(time.mktime(dt.datetime.now().timetuple()))))
+            descfile.write('\n%PACKAGER%\n{}\n'.format(self.pkginfo['packager']))
+            descfile.write('\n%SIZE%\n{}\n'.format(self.pkginfo['size']))
             if self.pkginfo['reason']:
-                print('\n%REASON%\n1', file=descfile)
+                descfile.write('\n%REASON%\n1\n')
             if self.pkginfo['group']:
-                print('\n%GROUPS%', file=descfile)
+                descfile.write('\n%GROUPS%\n')
                 for group in self.pkginfo['group']:
-                    print("{}".format(group), file=descfile)
-            print('\n%LICENSE%', file=descfile)
+                    descfile.write("{}\n".format(group))
+            descfile.write('\n%LICENSE%\n')
             for license in self.pkginfo['license']:
-                print("{}".format(license), file=descfile)
-            print("\n%VALIDATION%\n{}".format('gpg'), file=descfile)
+                descfile.write("{}\n".format(license))
+            descfile.write("\n%VALIDATION%\n{}\n".format('gpg'))
             if self.pkginfo['replaces']:
-                print('\n%REPLACES%', file=descfile)
+                descfile.write('\n%REPLACES%\n')
                 for replace in self.pkginfo['replaces']:
-                    print("{}".format(replace), file=descfile)
+                    descfile.write("{}\n".format(replace))
             if self.pkginfo['depend']:
-                print('\n%DEPENDS%', file=descfile)
+                descfile.write('\n%DEPENDS%\n')
                 for depend in self.pkginfo['depend']:
-                    print("{}".format(depend), file=descfile)
+                    descfile.write("{}\n".format(depend))
             if self.pkginfo['optdepend']:
-                print('\n%OPTDEPENDS%', file=descfile)
+                descfile.write('\n%OPTDEPENDS%\n')
                 for depend in self.pkginfo['optdepend']:
-                    print("{}".format(depend), file=descfile)
+                    descfile.write("{}\n".format(depend))
             if self.pkginfo['conflict']:
-                print('\n%CONFLICTS%', file=descfile)
+                descfile.write('\n%CONFLICTS%\n')
                 for conflict in self.pkginfo['conflict']:
-                    print("{}".format(conflict), file=descfile)
+                    descfile.write("{}\n".format(conflict))
             if self.pkginfo['provides']:
-                print('\n%PROVIDES%', file=descfile)
+                descfile.write('\n%PROVIDES%\n')
                 for provide in self.pkginfo['provides']:
-                    print("{}".format(provide), file=descfile)
-            print(file=descfile)
+                    descfile.write("{}\n".format(provide))
+            descfile.write(file=descfile)
             os.remove("/".join([self.rootpath, '.PKGINFO']))
 
     def installfile_fun(self):
@@ -238,17 +238,17 @@ class Package:
 
 
     def filesfile_fun(self):
-        filesfile = open(self.filesfile, 'w')
-        print("%FILES%", file=filesfile)
+        ff = open(self.filesfile, 'w')
+        ff.write("%FILES%\n")
         for line in self.file_list:
-            print(line, file=filesfile)
-        print(file=filesfile)
+            ff.write('{}\n'.format(line))
+        ff.write('\n')
         if self.pkginfo['backup']:
-            print("%BACKUP%", file=filesfile)
+            ff.write("%BACKUP%\n")
             for line in self.pkginfo['backup']:
-                print(line, self.get_md5sum(line), file=filesfile, sep='\t')
-        print(file=filesfile)
-        filesfile.close()
+                ff.write('{}\t{}\n'.format(line, self.get_md5sum(line)))
+        ff.write('\n')
+        ff.close()
 
     def mtreefile_fun(self):
         if '.MTREE' in self.file_list:
