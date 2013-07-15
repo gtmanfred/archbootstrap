@@ -102,6 +102,7 @@ def base_system(mirror, rootpath='/mnt/', devel=0):
 
     retpkg = packages
     retpkg.update(depends)
+
     return retpkg
 
     cache_location = '/'.join([rootpath, 'var/cache/pacman/pkg/'])
