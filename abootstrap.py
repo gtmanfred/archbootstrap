@@ -159,7 +159,8 @@ if __name__ == '__main__':
     #d = DescParse(open('/var/lib/pacman/local/pacman-4.1.2-1/desc'))
     #print(d.info)
     db = Repo('/var/lib/pacman/sync/core.db')
-    print(db.tree)
+    #print(db.tree)
+    print(db['pacman-4.1.2-1'].serialize('NAME VERSION DESC URL ARCH BUILDDATE INSTALLDATE PACKAGER SIZE REASON GROUPS LICENSE VALIDATION REPLACES DEPENDS OPTDEPENDS CONFLICTS PROVIDES'.split()))
 
 
 # vime: set ts=4 ws=4 et

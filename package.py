@@ -101,6 +101,21 @@ class DescParse(object):
             n = n.partition(c)[0]
         return n
 
+    def serialize(self, keys):
+        "returns string"
+        s = []
+        for k in keys:
+            if k not in self.info:
+                continue
+            v = self.info[k]
+            s.append('%{}%'.format(k))
+            if type(v) == list:
+                s.extend(v)
+            else:
+                s.append(str(v))
+            s.append('')
+        return '\n'.join(s)
+
 
 class Package:
     '''
