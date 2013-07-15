@@ -1,6 +1,6 @@
 #!/usr/bin/env python2
 
-import os
+import os, os.path
 import sys
 import tarfile
 import time
@@ -167,11 +167,12 @@ class Package:
         self.pkg.close()
         
     def post_install_fun(self):
-        with open(self.installfile, 'r') as  installfile:
-            if 'post_install' in installfile.read():
-                os.chroot(self.rootpath)
-                os.putenv('BASH_ENV', self.installfile)
-                subprocess.call(["bash", '-c', 'post_install'])
+        if os.path.isfile(self.installfile):
+            with open(self.installfile, 'r') as  installfile:
+                if 'post_install' in installfile.read():
+                    os.chroot(self.rootpath)
+                    os.putenv('BASH_ENV', self.installfile)
+                    subprocess.call(["bash", '-c', 'post_install'])
         
 
     def installpackage(self):

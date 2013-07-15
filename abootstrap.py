@@ -128,6 +128,7 @@ def base_system(mirror, rootpath='/mnt/', devel=0):
         thispkg.installpackage()
         installed_packages.append(thispkg)
 
+    installed_packages.sort();
     call(['mount', '-R', '/dev/', '/'.join([rootpath, 'dev/'])])
     call(['mount', '-R', '/sys/', '/'.join([rootpath, 'sys/'])])
     call(['mount', '-R', '/proc/', '/'.join([rootpath, 'proc/'])])
