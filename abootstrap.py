@@ -6,7 +6,7 @@ import os
 import re
 import tarfile
 from subprocess import call
-from package import Package
+from package import *
 
 try:
     from urllib.request import urlretrieve
@@ -155,5 +155,9 @@ def base_system(mirror, rootpath='/mnt/', devel=0):
 
 
 if __name__ == '__main__':
-    print( base_system('http://dfw.mirror.rackspace.com/archlinux/'))
+    #print( base_system('http://dfw.mirror.rackspace.com/archlinux/'))
+    d = DescParse(open('/var/lib/pacman/local/pacman-4.1.2-1/desc'))
+    print(d.info)
+
+
 # vime: set ts=4 ws=4 et

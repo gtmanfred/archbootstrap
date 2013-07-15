@@ -9,6 +9,56 @@ import datetime as dt
 import hashlib
 import shutil
 import subprocess
+from collections import defaultdict
+
+class DescParse(object):
+    """
+    """
+
+    def __init__(self, desc_file):
+        self.info = self.desc_load(desc_file)
+        self.info = self.desc_clean(self.info)
+
+    # bunch of stateless/static methods
+    # for easier testing and modularity
+    def desc_load(self, desc_file):
+        "takes a file-like object, returns a messy desc"
+        info = defaultdict(list)
+        mode = None
+        for line in desc_file:
+            line = self.clean(line)
+            if not line:
+                continue
+            if line.startswith('%'):
+                mode = line.strip('%')
+                continue
+            info[mode].append(line)
+        desc_file.close()
+        return info
+
+    def desc_clean(self, info):
+        "returns a new dictionary"
+        singles = 'NAME VERSION DESC URL SIZE INSTALLDATE BUILDDATE'.split()
+        integers = 'SIZE INSTALLDATE BUILDDATE'.split()
+        info2 = {}
+        for k in singles:
+            if k not in info:
+                continue
+            info2[k] = info[k][0]
+            if k in integers:
+                info2[k] = int(info2[k])
+        for k,v in info.items():
+            if k in info2:
+                continue
+            info2[k] = v
+        return info2
+
+    def clean(self, n):
+        n = n.strip()
+        for c in '><:=':
+            n = n.partition(c)[0]
+        return n
+
 
 class Package:
     '''
