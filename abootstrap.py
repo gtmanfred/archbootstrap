@@ -109,6 +109,13 @@ def base_system(mirror, rootpath='/mnt/', devel=0):
     cache_location = '/'.join([rootpath, 'var/cache/pacman/pkg/'])
     os.makedirs(cache_location, exist_ok=1)
 
+    for line in packages:
+        print(line)
+    for line in depends:
+        print(line)
+
+    return 0
+
     for package in packages:
         filename = '{}-{}.pkg.tar.xz'.format(package, arch)
         downloadfile = '/'.join([cache_location, filename])
