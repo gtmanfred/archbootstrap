@@ -134,13 +134,8 @@ class Package:
 
     def installfile_fun(self):
         if ".INSTALL" in self.file_list:
-            instfile = open("/".join([self.rootpath, '.INSTALL']))
-            installfile = open(self.installfile, 'w')
-            for line in instfile:
-                print(line, file=installfile, end='')
-            instfile.close()
-            installfile.close()
-            os.remove("/".join([self.rootpath, '.INSTALL']))
+            src = "/".join([self.rootpath, ".INSTALL"])
+            shutil.move(src, self.installfile)
 
     def get_md5sum(self, backup_file):
         tmpfile = open("/".join([self.rootpath, backup_file]), 'rb')
@@ -163,8 +158,9 @@ class Package:
         filesfile.close()
 
     def mtreefile_fun(self):
-        src = "/".join([self.rootpath, ".MTREE"])
-        shutil.move(src, self.mtreefile)
+        if '.MTREE' in self.file_list:
+            src = "/".join([self.rootpath, ".MTREE"])
+            shutil.move(src, self.mtreefile)
 
     def extractfiles(self):
         self.pkg.extractall(path=self.rootpath)
