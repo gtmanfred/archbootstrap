@@ -9,8 +9,7 @@ import datetime as dt
 import hashlib
 import shutil
 import subprocess
-from collections import defaultdict
-import io
+from collections import defaultdict, deque
 
 name_extract = lambda name, dashes: '-'.join(name.split('-')[:-dashes])
 remove_rel = lambda name: name_extract(name, 1)
@@ -67,6 +66,28 @@ class Repo(object):
             else:
                 tree[name] = desc
         return tree
+
+    def group_members(self, group):
+        matches = set()
+        for pkg in self.tree:
+            if 'GROUPS' not in self.tree[pkg]:
+                continue
+            if group in self.tree[pkg]['GROUPS']:
+                matches.add(pkg)
+        return matches
+
+    def depends(self, pkgs):
+        "recursive, returns set"
+        deps = set()
+        todo = deque(pkgs)
+        while todo:
+            pkg = todo.popleft()
+            if 'DEPENDS' not in self[pkg]:
+                continue
+            these_deps = set(ver_clean(p) for p in self[pkg]['DEPENDS'])
+            todo.extend(these_deps - deps)
+            deps.update(these_deps)
+        return deps
 
 class DescParse(object):
     """

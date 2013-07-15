@@ -154,6 +154,23 @@ def base_system(mirror, rootpath='/mnt/', devel=0):
     archive.close()
 
 
+
+def base_system2(mirror, rootpath='/mnt/', devel=0):
+    if os.path.isfile(mirror):
+        db = Repo(mirror)
+    else:
+        arch = os.uname()[-1]
+        coredb = '/'.join([mirror, 'core', 'os', arch, 'core.db'])
+        urlretrieve(coredb, '/tmp/coredb')
+        db = Repo('/tmp/coredb')
+    base_packages = db.group_members('base')
+    base_depends = db.depends(base_packages)
+    #print(db.tree)
+    print(len(base_packages), len(base_depends), len(base_packages | base_depends))
+    print(base_packages)
+    print(base_depends)
+
+
 if __name__ == '__main__':
     #print( base_system('http://dfw.mirror.rackspace.com/archlinux/'))
     #d = DescParse(open('/var/lib/pacman/local/pacman-4.1.2-1/desc'))
@@ -163,7 +180,9 @@ if __name__ == '__main__':
     #print(db['pacman-4.1.2-1'].serialize('NAME VERSION DESC URL ARCH BUILDDATE INSTALLDATE PACKAGER SIZE REASON GROUPS LICENSE VALIDATION REPLACES DEPENDS OPTDEPENDS CONFLICTS PROVIDES'.split()))
     #print(db['pacman-4.1.2'])
     #print(db['pacman'])
-    print(db['pacman-contrib'])
+    #print(db['pacman-contrib'])
+    base_system2('/var/lib/pacman/sync/core.db')
+    #base_system2('http://dfw.mirror.rackspace.com/archlinux/')
 
 
 # vime: set ts=4 ws=4 et
