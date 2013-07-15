@@ -100,21 +100,12 @@ def base_system(mirror, rootpath='/mnt/', devel=0):
         depends = find_depends(archive, depends2, depends=1)
         depends = depend_version(archive, depends) - packages
 
-    for line in packages:
-        print(line)
-    for line in depends:
-        print(line)
-    return 0
+    retpkg = packages
+    retpkg.update(depends)
+    return retpkg
 
     cache_location = '/'.join([rootpath, 'var/cache/pacman/pkg/'])
     os.makedirs(cache_location, exist_ok=1)
-
-    for line in packages:
-        print(line)
-    for line in depends:
-        print(line)
-
-    return 0
 
     for package in packages:
         filename = '{}-{}.pkg.tar.xz'.format(package, arch)
@@ -163,5 +154,5 @@ def base_system(mirror, rootpath='/mnt/', devel=0):
 
 
 if __name__ == '__main__':
-    base_system('http://dfw.mirror.rackspace.com/archlinux/')
+    print( base_system('http://dfw.mirror.rackspace.com/archlinux/'))
 # vime: set ts=4 ws=4 et
