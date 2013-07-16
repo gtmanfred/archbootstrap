@@ -14,6 +14,7 @@ except ImportError:
 
 def base_system(mirror, rootpath='/mnt/', devel=0):
     devel = 0
+    installed_packages = []
     arch = os.uname()[-1]
     if os.path.isfile(mirror):
         db = Repo(mirror)
@@ -50,8 +51,11 @@ def base_system(mirror, rootpath='/mnt/', devel=0):
     call(['mount', '-R', '/dev/', '/'.join([rootpath, 'dev/'])])
     call(['mount', '-R', '/sys/', '/'.join([rootpath, 'sys/'])])
     call(['mount', '-R', '/proc/', '/'.join([rootpath, 'proc/'])])
-    for pkg in installed_packages:
-        pkg.post_install_fun()
+    os.chroot(rootpath)
+    shutil.copyfile('./all_post_install', rootpath)
+    subprocess.call(["bash", '-c', '/all_post_install'])
+    os.remove('/all_post_install')
+
 
 
 if __name__ == '__main__':

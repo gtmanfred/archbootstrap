@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+for install_file in /var/lib/pacman/local/*/install; do
+    source $install_file
+    post_install
+done

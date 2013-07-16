@@ -278,7 +278,7 @@ class Package:
                 descfile.write('\n%PROVIDES%\n')
                 for provide in self.pkginfo['provides']:
                     descfile.write("{}\n".format(provide))
-            descfile.write(file=descfile)
+            descfile.write('\n')
             os.remove("/".join([self.rootpath, '.PKGINFO']))
 
     def installfile_fun(self):
