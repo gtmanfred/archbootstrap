@@ -52,12 +52,17 @@ def base_system(mirror, rootpath='/mnt/', devel=0):
     call(['mount', '-R', '/sys/', '/'.join([rootpath, 'sys/'])])
     call(['mount', '-R', '/proc/', '/'.join([rootpath, 'proc/'])])
     shutil.copyfile('/etc/resolv.conf', os.path.join(rootpath, '/etc/resolv.conf'))
+    shutil.copyfile('./all_post_install', os.path.join(rootpath, '/all_post_install'))
+    real_root = os.open("/", os.O_RDONLY)
     os.chroot(rootpath)
-    shutil.copyfile('./all_post_install', '/all_post_install')
+    os.fchdir(real_root)
+    os.chroot(".")
     subprocess.call(["bash", '/all_post_install'])
     os.remove('/all_post_install')
-
-
+    mirrorlist = open('/etc/pacman.d/mirrorlist', 'a')
+    mirrorlist.write('Server = {}/$repo/os/$arch'.format(mirror));
+    mirrorlist.close
+    os.close(real_root)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Basic commands')
