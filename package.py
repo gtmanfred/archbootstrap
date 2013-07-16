@@ -2,13 +2,8 @@
 
 from __future__ import print_function
 import os, os.path
-import sys
-import tarfile
-import time
+import sys, time, shutil, hashlib, tarfile, subprocess
 import datetime as dt
-import hashlib
-import shutil
-import subprocess
 from collections import defaultdict, deque
 
 name_extract = lambda name, dashes: '-'.join(name.split('-')[:-dashes])
