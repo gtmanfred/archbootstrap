@@ -79,7 +79,8 @@ class Repo(object):
             pkg = todo.popleft()
             if 'DEPENDS' not in self[pkg]:
                 continue
-            these_deps = set(ver_clean(p) for p in self[pkg]['DEPENDS'])
+            these_deps = [ver_clean(p) for p in self[pkg]['DEPENDS']]
+            these_deps = set(self[p]['NAME'] for p in these_deps)
             todo.extend(these_deps - deps)
             deps.update(these_deps)
         return deps - set(pkgs)

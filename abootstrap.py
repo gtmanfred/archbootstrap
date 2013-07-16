@@ -20,10 +20,13 @@ def base_system(mirror, rootpath='/mnt/', devel=0):
         urlretrieve(coredb, '/tmp/coredb')
         db = Repo('/tmp/coredb')
     base_packages = db.group_members('base')
+    base_packages = set(remove_v_r(p) for p in base_packages)
     base_depends = db.depends(base_packages)
     #print(len(base_packages), len(base_depends), len(base_packages | base_depends))
     #print(base_packages)
     #print(base_depends)
+    print('\n'.join(base_packages | base_depends))
+    return
     
     cache_location = '/'.join([rootpath, 'var/cache/pacman/pkg/'])
     # exist_ok is not in py2
@@ -62,8 +65,9 @@ if __name__ == '__main__':
     #print(db['pacman-4.1.2'])
     #print(db['pacman'])
     #print(db['pacman-contrib'])
-    base_system2('/var/lib/pacman/sync/core.db')
-    #base_system2('http://dfw.mirror.rackspace.com/archlinux/')
+    #base_system('/var/lib/pacman/sync/core.db')
+    #base_system('http://dfw.mirror.rackspace.com/archlinux/')
+    base_system('/tmp/coredb')
 
 
 # vime: set ts=4 ws=4 et
