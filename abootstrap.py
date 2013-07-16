@@ -51,6 +51,7 @@ def base_system(mirror, rootpath='/mnt/', devel=0):
     call(['mount', '-R', '/dev/', '/'.join([rootpath, 'dev/'])])
     call(['mount', '-R', '/sys/', '/'.join([rootpath, 'sys/'])])
     call(['mount', '-R', '/proc/', '/'.join([rootpath, 'proc/'])])
+    shutil.copyfile('/etc/resolv.conf', os.path.join(rootpath, '/etc/resolv.conf'))
     os.chroot(rootpath)
     shutil.copyfile('./all_post_install', '/all_post_install')
     subprocess.call(["bash", '/all_post_install'])
