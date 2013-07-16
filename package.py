@@ -78,7 +78,7 @@ class Repo(object):
 
     def depends(self, pkgs):
         "recursive, returns set"
-        deps = set()
+        deps = set(pkgs)
         todo = deque(pkgs)
         while todo:
             pkg = todo.popleft()
@@ -87,7 +87,7 @@ class Repo(object):
             these_deps = set(ver_clean(p) for p in self[pkg]['DEPENDS'])
             todo.extend(these_deps - deps)
             deps.update(these_deps)
-        return deps
+        return deps - set(pkgs)
 
 class DescParse(object):
     """
@@ -131,7 +131,7 @@ class DescParse(object):
 
     def desc_clean(self, info):
         "returns a new dictionary"
-        singles = 'NAME VERSION DESC URL'.split()
+        singles = 'NAME VERSION DESC URL ARCH'.split()
         integers = 'SIZE CSIZE ISIZE INSTALLDATE BUILDDATE'.split()
         info2 = {}
         for k in singles + integers:

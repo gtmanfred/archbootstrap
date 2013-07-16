@@ -154,21 +154,45 @@ def base_system(mirror, rootpath='/mnt/', devel=0):
     archive.close()
 
 
-
 def base_system2(mirror, rootpath='/mnt/', devel=0):
+    arch = os.uname()[-1]
     if os.path.isfile(mirror):
         db = Repo(mirror)
     else:
-        arch = os.uname()[-1]
         coredb = '/'.join([mirror, 'core', 'os', arch, 'core.db'])
         urlretrieve(coredb, '/tmp/coredb')
         db = Repo('/tmp/coredb')
     base_packages = db.group_members('base')
     base_depends = db.depends(base_packages)
-    #print(db.tree)
-    print(len(base_packages), len(base_depends), len(base_packages | base_depends))
-    print(base_packages)
-    print(base_depends)
+    #print(len(base_packages), len(base_depends), len(base_packages | base_depends))
+    #print(base_packages)
+    #print(base_depends)
+    
+    cache_location = '/'.join([rootpath, 'var/cache/pacman/pkg/'])
+    # exists_ok is not in py2
+    #os.makedirs(cache_location, exist_ok=1)
+
+    for pkg in base_packages | base_depends:
+        filename = '{}-{}-{}.pkg.tar.xz'.format(db[pkg]['NAME'], db[pkg]['VERSION'], db[pkg]['ARCH'])
+
+        downloadfile = '/'.join([cache_location, filename])
+        url = '/'.join([mirror, 'core', 'os', arch, filename])
+        print(url)
+        continue
+        urlretrieve(url, downloadfile)
+        thispkg = Package(downloadfile, rootpath)
+        if pkg in base_depends:
+            thispkg.pkginfo['reason'] = 1
+        thispkg.installpackage()
+        installed_packages.append(thispkg)
+
+    return
+
+    call(['mount', '-R', '/dev/', '/'.join([rootpath, 'dev/'])])
+    call(['mount', '-R', '/sys/', '/'.join([rootpath, 'sys/'])])
+    call(['mount', '-R', '/proc/', '/'.join([rootpath, 'proc/'])])
+    for pkg in installed_packages:
+        pkg.post_install_fun()
 
 
 if __name__ == '__main__':
