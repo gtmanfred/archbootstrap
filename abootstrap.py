@@ -52,19 +52,18 @@ def base_system(mirror, rootpath='/mnt/', devel=0):
     call(['mount', '-R', '/sys/', '/'.join([rootpath, 'sys/'])])
     call(['mount', '-R', '/proc/', '/'.join([rootpath, 'proc/'])])
     os.chroot(rootpath)
-    shutil.copyfile('./all_post_install', rootpath)
-    subprocess.call(["bash", '-c', '/all_post_install'])
+    shutil.copyfile('./all_post_install', '/all_post_install')
+    subprocess.call(["bash", '/all_post_install'])
     os.remove('/all_post_install')
 
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Basic commands')
-    parser.add_argument( '-m',  '--mirror', nargs=1,
-                        default="http://mirrors.kernel.org/archlinux/", 
+    parser.add_argument( '-m',  '--mirror', nargs=1, required=True,
                         help='Mirror to download from')
-    parser.add_argument( '-r', '--root', nargs=1,
-                        default='/mnt', help='Destination to install to')
+    parser.add_argument( '-r', '--root', nargs=1, required=True,
+                        help='Destination to install to')
     parser.add_argument( '-d', '--devel', nargs=1, 
                          default=0, help='And base-devel')
     args = parser.parse_args()
