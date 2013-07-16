@@ -4,6 +4,7 @@ from __future__ import print_function, generators, with_statement
 import argparse
 from time import sleep
 import os, re, tarfile
+import os.path
 from subprocess import call
 from package import *
 
@@ -48,11 +49,11 @@ def base_system(mirror, rootpath='/mnt/', devel=0):
 
     return
 
+    shutil.copyfile('/etc/resolv.conf', '/'.join([rootpath, '/etc/resolv.conf']))
+    shutil.copyfile('./all_post_install', '/'.join([rootpath, '/all_post_install']))
     call(['mount', '-R', '/dev/', '/'.join([rootpath, 'dev/'])])
     call(['mount', '-R', '/sys/', '/'.join([rootpath, 'sys/'])])
     call(['mount', '-R', '/proc/', '/'.join([rootpath, 'proc/'])])
-    shutil.copyfile('/etc/resolv.conf', os.path.join(rootpath, '/etc/resolv.conf'))
-    shutil.copyfile('./all_post_install', os.path.join(rootpath, '/all_post_install'))
     real_root = os.open("/", os.O_RDONLY)
     os.chroot(rootpath)
     os.fchdir(real_root)
