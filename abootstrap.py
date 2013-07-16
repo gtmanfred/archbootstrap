@@ -56,8 +56,6 @@ def base_system(mirror, rootpath='/mnt/', devel=0):
     call(['mount', '-R', '/proc/', '/'.join([rootpath, 'proc/'])])
     real_root = os.open("/", os.O_RDONLY)
     os.chroot(rootpath)
-    os.fchdir(real_root)
-    os.chroot(".")
     subprocess.call(["bash", '/all_post_install'])
     os.remove('/all_post_install')
     mirrorlist = open('/etc/pacman.d/mirrorlist', 'a')
